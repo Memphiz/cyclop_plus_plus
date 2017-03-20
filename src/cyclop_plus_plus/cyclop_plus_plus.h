@@ -47,6 +47,7 @@
 #define F_BAND_OPTION             10
 #define R_BAND_OPTION             11
 #define L_BAND_OPTION             12
+#define BATTERY_TEXT_OPTION       13
 
 #define BATTERY_ALARM_DEFAULT     1   /* On    */
 #define ALARM_LEVEL_DEFAULT       5   /* value 1-8   */
@@ -61,13 +62,14 @@
 #define F_BAND_DEFAULT            1   /* On */
 #define R_BAND_DEFAULT            1   /* On */
 #define L_BAND_DEFAULT            1   /* On */
+#define BATTERY_TEXT_DEFAULT      0   /* Off */
 
-#define MAX_OPTIONS               13
+#define MAX_OPTIONS               14
 
 // User Configuration Commands
-#define TEST_ALARM_COMMAND        13
-#define RESET_SETTINGS_COMMAND    14
-#define EXIT_COMMAND              15
+#define TEST_ALARM_COMMAND        14
+#define RESET_SETTINGS_COMMAND    15
+#define EXIT_COMMAND              16
 #define MAX_COMMANDS              3
 
 // Number of lines in configuration menu

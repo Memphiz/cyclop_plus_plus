@@ -104,7 +104,7 @@
 
 unsigned int  autoScan( unsigned int frequency );
 unsigned int  averageAnalogRead( unsigned char pin );
-void          batteryMeter(unsigned char x, unsigned char y, bool showNumbers = false);
+void          batteryMeter(unsigned char x, unsigned char y);
 unsigned char bestChannelMatch( unsigned int frequency );
 void          buttonPressInterrupt();
 void          drawAutoScanScreen(void);
@@ -695,7 +695,7 @@ unsigned int getVoltage( void )
 //******************************************************************************
 //* function: batteryMeter
 //******************************************************************************
-void batteryMeter( unsigned char x, unsigned char y, bool showNumbers )
+void batteryMeter( unsigned char x, unsigned char y )
 {
   unsigned int voltage;
   unsigned char value;
@@ -741,7 +741,7 @@ void batteryMeter( unsigned char x, unsigned char y, bool showNumbers )
     alarmOnPeriod = 0;
     alarmOffPeriod = 0;
   }
-  drawBattery(x, y, value, showNumbers);
+  drawBattery(x, y, value, options[BATTERY_TEXT_OPTION]);
 }
 
 //******************************************************************************
@@ -798,6 +798,7 @@ void resetOptions(void) {
   options[F_BAND_OPTION]           = F_BAND_DEFAULT;
   options[R_BAND_OPTION]           = R_BAND_DEFAULT;
   options[L_BAND_OPTION]           = L_BAND_DEFAULT;
+  options[BATTERY_TEXT_OPTION]     = BATTERY_TEXT_DEFAULT;
 
   updateSoftPositions();
 }
@@ -1247,6 +1248,7 @@ void drawOptionsScreen(unsigned char option, unsigned char in_edit_state ) {
       case F_BAND_OPTION:            osd_string("fatshark band      "); break;
       case R_BAND_OPTION:            osd_string("race band          "); break;
       case L_BAND_OPTION:            osd_string("low band           "); break;
+      case BATTERY_TEXT_OPTION:      osd_string("show bat percentage"); break;
       case RESET_SETTINGS_COMMAND:   osd_string("reset settings     "); break;
       case TEST_ALARM_COMMAND:       osd_string("test alarm         "); break;
       case EXIT_COMMAND:             osd_string("exit               "); break;
@@ -1275,6 +1277,7 @@ void drawOptionsScreen(unsigned char option, unsigned char in_edit_state ) {
         case F_BAND_OPTION:           osd_string(options[j] ? "on     " : "off    "); break;
         case R_BAND_OPTION:           osd_string(options[j] ? "on     " : "off    "); break;
         case L_BAND_OPTION:           osd_string(options[j] ? "on     " : "off    "); break;
+        case BATTERY_TEXT_OPTION:     osd_string(options[j] ? "on     " : "off    "); break;
       }
     }
     else
