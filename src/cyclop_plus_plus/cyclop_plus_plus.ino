@@ -69,6 +69,8 @@
 #define CMD_NEWLINE         13  /* Moves cursor to start of the next line      */
 #define CMD_SET_X           14  /* Position X cursor (next char is a parameter)*/
 #define CMD_SET_Y           15  /* Position Y cursor (next char is a parameter)*/
+#define CMD_SET_OFFSET      16  /* Display Offset XY cursor (next 2 chars are parameters)*/
+
 //******************************************************************************
 //* Character constants
 
@@ -122,6 +124,7 @@ char         *longNameOfChannel(unsigned char channel, char *name);
 unsigned char nextChannel( unsigned char channel);
 void          osd( unsigned char command );
 void          osd( unsigned char command, unsigned char param );
+void          osd( unsigned char command, unsigned char param1, unsigned char param2 );
 void          osd_char( unsigned char token );
 void          osd_int( unsigned int integer );
 void          osd_string( const char *str );
@@ -131,6 +134,7 @@ void          resetOptions(void);
 char         *shortNameOfChannel(unsigned char channel, char *name);
 void          setOptions( void );
 void          updateScannerScreen(unsigned char position, unsigned char value1, unsigned char value2 );
+void          applyDisplayOffset(void);
 
 //******************************************************************************
 //* Positions in the frequency table for the 48 channels
@@ -799,6 +803,8 @@ void resetOptions(void) {
   options[R_BAND_OPTION]           = R_BAND_DEFAULT;
   options[L_BAND_OPTION]           = L_BAND_DEFAULT;
   options[BATTERY_TEXT_OPTION]     = BATTERY_TEXT_DEFAULT;
+  options[OFFSET_X_OPTION]         = OFFSET_X_DEFAULT;
+  options[OFFSET_Y_OPTION]         = OFFSET_Y_DEFAULT;
 
   updateSoftPositions();
 }
@@ -841,6 +847,16 @@ void setOptions()
             if (options[BATTERY_CALIB_OPTION] < 250)
               options[BATTERY_CALIB_OPTION] += 5;
           }
+          else if (menuSelection == OFFSET_X_OPTION)
+          {
+            if (options[OFFSET_X_OPTION] <= 63)
+              options[OFFSET_X_OPTION]++;
+          }
+          else if (menuSelection == OFFSET_Y_OPTION)
+          {
+            if (options[OFFSET_Y_OPTION] <= 31)
+              options[OFFSET_Y_OPTION]++;
+          }
           else
             options[menuSelection] = !options[menuSelection];
           break;
@@ -855,6 +871,16 @@ void setOptions()
           {
             if (options[BATTERY_CALIB_OPTION] > 5)
               options[BATTERY_CALIB_OPTION] -= 5;
+          }
+          else if (menuSelection == OFFSET_X_OPTION)
+          {
+            if (options[OFFSET_X_OPTION] >= 0)
+              options[OFFSET_X_OPTION]--;
+          }
+          else if (menuSelection == OFFSET_Y_OPTION)
+          {
+            if (options[OFFSET_Y_OPTION] >= 0)
+              options[OFFSET_Y_OPTION]--;
           }
           else
             options[menuSelection] = !options[menuSelection];
@@ -890,6 +916,9 @@ void setOptions()
           else if (menuSelection == TEST_ALARM_COMMAND) {
             testAlarm();
           }
+          else if (menuSelection == SET_OFFSET_COMMAND) {
+            applyDisplayOffset();
+          }
           else
             in_edit_state = 1;
           break;
@@ -900,6 +929,12 @@ void setOptions()
     }
   }
   updateSoftPositions();
+}
+
+void applyDisplayOffset(void) {
+  unsigned char offsetX = options[OFFSET_X_OPTION];
+  unsigned char offsetY = options[OFFSET_Y_OPTION];
+  osd( CMD_SET_OFFSET, offsetX, offsetX );
 }
 
 //******************************************************************************
@@ -958,6 +993,18 @@ void osd( unsigned char command, unsigned char param )
   Serial.write( CMD_CMD );
   Serial.write( command );
   Serial.write( param );
+}
+
+//******************************************************************************
+//* function: osd
+//******************************************************************************
+void osd( unsigned char command, unsigned char param1, unsigned char param2 )
+{
+  while (Serial.availableForWrite() < 4) ;
+  Serial.write( CMD_CMD );
+  Serial.write( command );
+  Serial.write( param1 );
+  Serial.write( param2 );
 }
 
 //******************************************************************************
@@ -1249,8 +1296,11 @@ void drawOptionsScreen(unsigned char option, unsigned char in_edit_state ) {
       case R_BAND_OPTION:            osd_string("race band          "); break;
       case L_BAND_OPTION:            osd_string("low band           "); break;
       case BATTERY_TEXT_OPTION:      osd_string("show bat percentage"); break;
+      case OFFSET_X_OPTION:          osd_string("disp offset X      "); break;
+      case OFFSET_Y_OPTION:          osd_string("disp offset Y      "); break;
       case RESET_SETTINGS_COMMAND:   osd_string("reset settings     "); break;
       case TEST_ALARM_COMMAND:       osd_string("test alarm         "); break;
+      case SET_OFFSET_COMMAND:       osd_string("apply disp offset  "); break;
       case EXIT_COMMAND:             osd_string("exit               "); break;
     }
     if ((j == option) && in_edit_state) {
@@ -1278,6 +1328,8 @@ void drawOptionsScreen(unsigned char option, unsigned char in_edit_state ) {
         case R_BAND_OPTION:           osd_string(options[j] ? "on     " : "off    "); break;
         case L_BAND_OPTION:           osd_string(options[j] ? "on     " : "off    "); break;
         case BATTERY_TEXT_OPTION:     osd_string(options[j] ? "on     " : "off    "); break;
+        case OFFSET_X_OPTION:         osd_int(options[j]);      osd_string("px    "); break;
+        case OFFSET_Y_OPTION:         osd_int(options[j]);      osd_string("px    "); break;
       }
     }
     else
